@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: finvoice
+      MONGO_INITDB_ROOT_PASSWORD: finvoice123
+      MONGO_INITDB_DATABASE: finvoice
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - finvoice-network
+
+  # Redis for caching and job queues
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - finvoice-network
+
+  # MinIO for file storage (S3-compatible)
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: finvoice
+      MINIO_ROOT_PASSWORD: finvoice123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    networks:
+      - finvoice-network
+
+  # MailHog for email testing
+  mailhog:
+    image: mailhog/mailhog:latest
+    restart: unless-stopped
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
+    networks:
+      - finvoice-network
+
+volumes:
+  mongodb_data:
+  redis_data:
+  minio_data:
+
+networks:
+  finvoice-network:
+    driver: bridge

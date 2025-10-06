@@ -1,0 +1,25 @@
+export enum InvoiceStatus {
+  DRAFT = 'DRAFT',
+  FINALIZED = 'FINALIZED',
+  SENT = 'SENT',
+  PARTIALLY_PAID = 'PARTIALLY_PAID',
+  PAID = 'PAID',
+  OVERDUE = 'OVERDUE',
+  CANCELLED = 'CANCELLED',
+  VOID = 'VOID',
+  OVERPAID = 'OVERPAID'
+}
+
+export enum InvoiceType {
+  STANDARD = 'STANDARD',
+  RECURRING = 'RECURRING',
+  CREDIT_NOTE = 'CREDIT_NOTE',
+  PROFORMA = 'PROFORMA'
+}
+
+export enum InvoiceFrequency {
+  WEEKLY = 'WEEKLY',
+  MONTHLY = 'MONTHLY',
+  QUARTERLY = 'QUARTERLY',
+  ANNUALLY = 'ANNUALLY'
+}

@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2020",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "types": ["node", "jest"],
+    "typeRoots": ["./node_modules/@types"],
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "paths": {
+      "@shared/*": ["./shared/*"],
+      "@billing/*": ["./services/billing/src/*"],
+      "@payments/*": ["./services/payments/src/*"],
+      "@expenses/*": ["./services/expenses/src/*"],
+      "@auth/*": ["./services/auth/src/*"],
+      "@clients/*": ["./services/clients/src/*"],
+      "@reports/*": ["./services/reports/src/*"],
+      "@notifications/*": ["./services/notifications/src/*"]
+    }
+  },
+  "exclude": ["tests/**/*", "node_modules", "dist"]
+}

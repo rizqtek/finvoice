@@ -1,0 +1,3 @@
+export const BILLING_TOKENS = {
+  INVOICE_REPOSITORY: 'INVOICE_REPOSITORY',
+} as const;

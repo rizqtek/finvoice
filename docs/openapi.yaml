@@ -1,0 +1,762 @@
+openapi: 3.0.3
+info:
+  title: Finvoice API
+  description: Financial Management & Automated Invoicing System API
+  version: 1.0.0
+  contact:
+    name: Finvoice Team
+    email: support@finvoice.com
+    url: https://finvoice.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+  - url: https://api.finvoice.com/v1
+    description: Production server
+
+security:
+  - bearerAuth: []
+
+paths:
+  # Authentication
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: User login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: user@example.com
+                password:
+                  type: string
+                  format: password
+                  example: password123
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                      refreshToken:
+                        type: string
+                      user:
+                        $ref: '#/components/schemas/User'
+
+  # Invoices
+  /invoices:
+    get:
+      tags: [Invoices]
+      summary: List invoices
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/InvoiceStatus'
+        - name: clientId
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of invoices
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Invoice'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+    
+    post:
+      tags: [Invoices]
+      summary: Create new invoice
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateInvoiceDto'
+      responses:
+        '201':
+          description: Invoice created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      invoiceId:
+                        type: string
+                      invoiceNumber:
+                        type: string
+                      total:
+                        $ref: '#/components/schemas/Money'
+
+  /invoices/{id}:
+    get:
+      tags: [Invoices]
+      summary: Get invoice by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invoice details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    $ref: '#/components/schemas/InvoiceWithCalculations'
+        '404':
+          description: Invoice not found
+
+    delete:
+      tags: [Invoices]
+      summary: Delete invoice
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Invoice deleted successfully
+
+  /invoices/{id}/send:
+    put:
+      tags: [Invoices]
+      summary: Send invoice to client
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: client@example.com
+      responses:
+        '200':
+          description: Invoice sent successfully
+
+  /invoices/{id}/mark-paid:
+    put:
+      tags: [Invoices]
+      summary: Mark invoice as paid
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MarkInvoicePaidDto'
+      responses:
+        '200':
+          description: Invoice marked as paid
+
+  # Payment Webhooks
+  /webhooks/stripe:
+    post:
+      tags: [Payment Webhooks]
+      summary: Stripe webhook handler
+      security: []
+      parameters:
+        - name: stripe-signature
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Webhook processed successfully
+
+  /webhooks/razorpay:
+    post:
+      tags: [Payment Webhooks]
+      summary: Razorpay webhook handler
+      security: []
+      parameters:
+        - name: x-razorpay-signature
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Webhook processed successfully
+
+  # Clients
+  /clients:
+    get:
+      tags: [Clients]
+      summary: List clients
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of clients
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Client'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags: [Clients]
+      summary: Create new client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClientDto'
+      responses:
+        '201':
+          description: Client created successfully
+
+  # Expenses
+  /expenses:
+    get:
+      tags: [Expenses]
+      summary: List expenses
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/ExpenseStatus'
+        - name: category
+          in: query
+          schema:
+            $ref: '#/components/schemas/ExpenseCategory'
+      responses:
+        '200':
+          description: List of expenses
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ExpenseReport'
+                      pagination:
+                        $ref: '#/components/schemas/Pagination'
+
+    post:
+      tags: [Expenses]
+      summary: Create new expense
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateExpenseDto'
+      responses:
+        '201':
+          description: Expense created successfully
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    # Common
+    Money:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: double
+          example: 1080.00
+        currency:
+          type: string
+          example: USD
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 10
+        total:
+          type: integer
+          example: 100
+        totalPages:
+          type: integer
+          example: 10
+
+    Address:
+      type: object
+      properties:
+        street:
+          type: string
+          example: "123 Main Street"
+        city:
+          type: string
+          example: "New York"
+        state:
+          type: string
+          example: "NY"
+        postalCode:
+          type: string
+          example: "10001"
+        country:
+          type: string
+          example: "USA"
+
+    # Users & Auth
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        role:
+          type: string
+          enum: [ADMIN, MANAGER, EMPLOYEE]
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    # Invoices
+    InvoiceStatus:
+      type: string
+      enum: [DRAFT, SENT, VIEWED, PAID, OVERDUE, CANCELLED]
+
+    TaxRate:
+      type: object
+      properties:
+        rate:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 1
+          example: 0.08
+        name:
+          type: string
+          example: "Sales Tax"
+
+    LineItem:
+      type: object
+      properties:
+        description:
+          type: string
+          example: "Web Development Services"
+        quantity:
+          type: integer
+          minimum: 1
+          example: 1
+        unitPrice:
+          type: number
+          format: double
+          minimum: 0
+          example: 1000.00
+        currency:
+          type: string
+          example: "USD"
+        taxRate:
+          $ref: '#/components/schemas/TaxRate'
+
+    CreateInvoiceDto:
+      type: object
+      required: [clientId, invoiceNumber, issueDate, dueDate, lineItems]
+      properties:
+        clientId:
+          type: string
+          example: "client_123"
+        invoiceNumber:
+          type: string
+          example: "INV-2024-001"
+        issueDate:
+          type: string
+          format: date
+          example: "2024-01-15"
+        dueDate:
+          type: string
+          format: date
+          example: "2024-02-15"
+        lineItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItem'
+        notes:
+          type: string
+          example: "Payment due within 30 days"
+
+    MarkInvoicePaidDto:
+      type: object
+      required: [amount, currency, paymentMethod]
+      properties:
+        amount:
+          type: number
+          format: double
+          minimum: 0
+          example: 1080.00
+        currency:
+          type: string
+          example: "USD"
+        paymentMethod:
+          type: string
+          example: "stripe"
+
+    Invoice:
+      type: object
+      properties:
+        id:
+          type: string
+        clientId:
+          type: string
+        invoiceNumber:
+          type: string
+        issueDate:
+          type: string
+          format: date-time
+        dueDate:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/InvoiceStatus'
+        lineItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItem'
+        notes:
+          type: string
+        sentAt:
+          type: string
+          format: date-time
+        paidAt:
+          type: string
+          format: date-time
+        paidAmount:
+          $ref: '#/components/schemas/Money'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    InvoiceWithCalculations:
+      allOf:
+        - $ref: '#/components/schemas/Invoice'
+        - type: object
+          properties:
+            calculations:
+              type: object
+              properties:
+                subtotal:
+                  $ref: '#/components/schemas/Money'
+                total:
+                  $ref: '#/components/schemas/Money'
+                taxLines:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      taxRate:
+                        $ref: '#/components/schemas/TaxRate'
+                      amount:
+                        $ref: '#/components/schemas/Money'
+
+    # Clients
+    CreateClientDto:
+      type: object
+      required: [name, email]
+      properties:
+        name:
+          type: string
+          example: "Acme Corporation"
+        email:
+          type: string
+          format: email
+          example: "contact@acme.com"
+        phone:
+          type: string
+          example: "+1-555-123-4567"
+        taxId:
+          type: string
+          example: "123456789"
+        address:
+          $ref: '#/components/schemas/Address'
+        billingAddress:
+          $ref: '#/components/schemas/Address'
+
+    Client:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        taxId:
+          type: string
+        address:
+          $ref: '#/components/schemas/Address'
+        billingAddress:
+          $ref: '#/components/schemas/Address'
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # Expenses
+    ExpenseStatus:
+      type: string
+      enum: [DRAFT, SUBMITTED, UNDER_REVIEW, APPROVED, REJECTED, PAID]
+
+    ExpenseCategory:
+      type: string
+      enum: [TRAVEL, MEALS, OFFICE_SUPPLIES, SOFTWARE, MARKETING, UTILITIES, PROFESSIONAL_SERVICES, OTHER]
+
+    CreateExpenseDto:
+      type: object
+      required: [title, description, amount, currency, category, expenseDate]
+      properties:
+        title:
+          type: string
+          example: "Client Meeting Lunch"
+        description:
+          type: string
+          example: "Business lunch with client to discuss project requirements"
+        amount:
+          type: number
+          format: double
+          minimum: 0
+          example: 45.50
+        currency:
+          type: string
+          example: "USD"
+        category:
+          $ref: '#/components/schemas/ExpenseCategory'
+        expenseDate:
+          type: string
+          format: date
+          example: "2024-01-15"
+        projectId:
+          type: string
+          example: "project_123"
+        notes:
+          type: string
+          example: "Discussed budget and timeline"
+
+    ExpenseReport:
+      type: object
+      properties:
+        id:
+          type: string
+        employeeId:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        amount:
+          type: number
+          format: double
+        currency:
+          type: string
+        category:
+          $ref: '#/components/schemas/ExpenseCategory'
+        expenseDate:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/ExpenseStatus'
+        receipt:
+          type: object
+          properties:
+            fileName:
+              type: string
+            fileUrl:
+              type: string
+            fileSize:
+              type: integer
+            mimeType:
+              type: string
+            uploadedAt:
+              type: string
+              format: date-time
+        submittedAt:
+          type: string
+          format: date-time
+        reviewedAt:
+          type: string
+          format: date-time
+        reviewedBy:
+          type: string
+        approvedAmount:
+          type: number
+          format: double
+        rejectionReason:
+          type: string
+        notes:
+          type: string
+        projectId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+tags:
+  - name: Auth
+    description: Authentication and authorization
+  - name: Invoices
+    description: Invoice management
+  - name: Payment Webhooks
+    description: Payment gateway webhook handlers
+  - name: Clients
+    description: Client management
+  - name: Expenses
+    description: Expense reporting and management
+  - name: Reports
+    description: Financial reports and analytics
+  - name: Notifications
+    description: Notification management

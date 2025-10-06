@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ES2020",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "paths": {
+      "@auth/*": ["src/modules/auth/*"],
+      "@billing/*": ["src/modules/billing/*"],
+      "@payment/*": ["src/modules/payment/*"],
+      "@expense/*": ["src/modules/expense/*"],
+      "@time/*": ["src/modules/time/*"],
+      "@client/*": ["src/modules/client/*"],
+      "@project/*": ["src/modules/project/*"],
+      "@notification/*": ["src/modules/notification/*"],
+      "@analytics/*": ["src/modules/analytics/*"],
+      "@shared/*": ["src/shared/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "tests/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "services/analytics/src/**/*",
+    "services/api-gateway/src/**/*",
+    "services/blockchain/src/**/*"
+  ]
+}

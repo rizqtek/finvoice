@@ -1,0 +1,15 @@
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  PROCESSING = 'PROCESSING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  CANCELLED = 'CANCELLED',
+  REFUNDED = 'REFUNDED'
+}
+
+export enum PaymentMethod {
+  STRIPE = 'STRIPE',
+  RAZORPAY = 'RAZORPAY',
+  PAYPAL = 'PAYPAL',
+  BANK_TRANSFER = 'BANK_TRANSFER'
+}
