@@ -482,3 +482,213 @@ For enterprise support, custom development, and consulting services, please cont
 [![Powered by TypeScript](https://img.shields.io/badge/Powered%20by-TypeScript-blue.svg)](https://www.typescriptlang.org/)
 [![MongoDB](https://img.shields.io/badge/Database-MongoDB-green.svg)](https://www.mongodb.com/)
 [![Redis](https://img.shields.io/badge/Cache-Redis-red.svg)](https://redis.io/)
+
+---
+
+## 📚 Comprehensive Documentation
+
+### Core Modules & Features
+
+#### 1. Authentication & Accounts
+- JWT-based authentication (access & refresh tokens)
+- User registration, login, logout
+- Password reset & email verification
+- Role-based access control (RBAC)
+- Guards for protected endpoints
+
+#### 2. Billing (Invoices)
+- Create, read, update, delete invoices
+- Invoice templates and recurring billing
+- Domain-driven aggregates and value objects (Money, TaxRate)
+- MongoDB persistence with Mongoose
+- Invoice status tracking (draft, sent, paid, overdue)
+- API validation and error handling
+
+#### 3. Payments
+- Payment gateway adapters (Stripe, PayPal, etc.)
+- Payment status tracking
+- Reconciliation workflows
+
+#### 4. Expenses
+- Expense reporting
+- Receipt upload and OCR (scaffolded)
+- Approval workflows
+
+#### 5. Clients & Projects
+- Client management
+- Project management
+
+#### 6. Reports & Analytics
+- Financial reporting
+- Analytics dashboards (scaffolded)
+
+#### 7. Notifications
+- Email, SMS, push notifications
+- Notification templates
+
+#### 8. Admin
+- User, role, permission management
+- Audit logs
+- System settings
+
+#### 9. Infrastructure & Shared Services
+- MongoDB and Redis integration
+- Health check endpoints
+- Global configuration management
+- API documentation (Swagger/OpenAPI)
+- Background job queues (BullMQ-ready)
+
+#### 10. Security & Compliance
+- JWT authentication and authorization
+- Role-based access control
+- Input validation and error handling
+- Audit logging
+
+#### 11. Deployment & Operations
+- Docker Compose for local development (MongoDB, Redis, Mongo Express)
+- Environment-based configuration
+- Health and readiness endpoints for monitoring
+
+---
+
+### API Documentation
+
+#### Swagger UI
+- **URL:** `/api/docs`
+- **Tags:**
+  - Auth
+  - Invoices
+  - Payments
+  - Expenses
+  - Clients
+  - Reports
+  - Notifications
+  - Admin
+
+#### Example Endpoints
+
+##### Authentication
+- `POST /api/v1/auth/register` — Register new user
+- `POST /api/v1/auth/login` — User login
+- `POST /api/v1/auth/refresh` — Refresh token
+- `POST /api/v1/auth/logout` — Logout
+- `POST /api/v1/auth/forgot-password` — Request password reset
+- `POST /api/v1/auth/reset-password` — Reset password
+
+##### Billing (Invoices)
+- `POST /api/v1/invoices` — Create invoice
+- `GET /api/v1/invoices` — List invoices
+- `GET /api/v1/invoices/:id` — Get invoice details
+- `PUT /api/v1/invoices/:id` — Update invoice
+- `DELETE /api/v1/invoices/:id` — Delete invoice
+
+##### Payments
+- `POST /api/v1/payments` — Process payment (scaffolded)
+- `GET /api/v1/payments/:id` — Get payment status (scaffolded)
+
+##### Expenses
+- `POST /api/v1/expenses` — Report expense (scaffolded)
+- `GET /api/v1/expenses` — List expenses (scaffolded)
+
+##### Clients
+- `POST /api/v1/clients` — Create client (scaffolded)
+- `GET /api/v1/clients` — List clients (scaffolded)
+
+##### Reports
+- `GET /api/v1/reports` — Financial reports (scaffolded)
+
+##### Notifications
+- `POST /api/v1/notifications` — Send notification (scaffolded)
+
+##### Admin
+- `GET /api/v1/admin/users` — List users
+- `POST /api/v1/admin/users` — Create user
+- `GET /api/v1/admin/roles` — List roles
+- `POST /api/v1/admin/roles` — Create role
+- `GET /api/v1/admin/permissions` — List permissions
+
+##### Health
+- `GET /api/v1/health` — Application health status
+- `GET /api/v1/health/ready` — Readiness check
+
+---
+
+### Project Structure
+```
+src/
+├── modules/
+│   ├── auth/
+│   ├── billing/
+│   ├── payment/
+│   ├── expenses/
+│   ├── clients/
+│   ├── reports/
+│   ├── notifications/
+│   ├── admin/
+├── shared/
+│   ├── infrastructure/
+│   ├── guards/
+│   ├── controllers/
+└── main.ts
+```
+
+---
+
+### Setup & Deployment
+
+#### 1. Clone the repository
+```bash
+git clone https://github.com/rizqtek/finvoice.git
+cd finvoice
+```
+
+#### 2. Install dependencies
+```bash
+npm install
+```
+
+#### 3. Configure environment
+- Copy `.env.sample` to `.env` and update values as needed
+
+#### 4. Start dependencies (MongoDB, Redis)
+```bash
+docker-compose up -d
+```
+
+#### 5. Start the application
+```bash
+npm run start:dev
+```
+
+#### 6. Access API & Docs
+- API: `http://localhost:3000`
+- Swagger: `http://localhost:3000/api/docs`
+
+---
+
+### Testing
+```bash
+npm run test       # Unit tests
+npm run test:e2e   # End-to-end tests
+npm run test:cov   # Coverage
+```
+
+---
+
+### Extensibility Roadmap
+- Expenses: OCR, approval workflows
+- Time & Mileage: Time tracking, trip logging
+- Advanced Reports & Analytics
+- Payment gateway integrations
+- Notification channels (SMS, push)
+- File upload (receipts, invoice PDFs)
+
+---
+
+### License
+MIT
+
+---
+
+### Contact
+For support or business inquiries, contact [info@rizqtek.com](mailto:info@rizqtek.com)
